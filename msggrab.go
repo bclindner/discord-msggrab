@@ -30,8 +30,8 @@ type Config struct {
 
 func main() {
 	// parse args
-	configFile := flag.String("conf", "msggrab.json", "Config file for the bot (default msggrab.json)")
-	outFile := flag.String("out", "msggrab.log", "Output file to put the links in (default msggrab.log)")
+	configFile := flag.String("conf", "msggrab.json", "Config file for the bot")
+	outFile := flag.String("out", "msggrab.log", "Output file to put the links in")
 	flag.Parse()
 
 	// read the config file
