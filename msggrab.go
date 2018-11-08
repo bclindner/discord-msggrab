@@ -40,7 +40,7 @@ func main() {
 	for _, channel := range channels {
 		// use channels to parse stuff because why not?
 		lines := make(chan string)
-		go ScrapeLinksToFile(bot, channel, *amountPerLoop, lines)
+		go ScrapeLinks(bot, channel, *amountPerLoop, lines)
 		for line := range lines {
 			outFileStream.WriteString(line+"\n")
 		}
@@ -52,12 +52,12 @@ func main() {
 	os.Exit(0)
 }
 
-func ScrapeLinksToFile(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
+func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
 	log.Println("Scraping channel with ID",channel)
 	lines <- "-----BEGIN CHANNEL "+channel+"-----\n"
-	log.Println("trace")
 	// initialize a counter for messages parsed (for logging)
 	messagesParsed := 0
+	linksSent := 0
 	// set lastMessage to empty so it starts from the most recent message
 	lastMessage := ""
 	// initialize the history buffer to ensure the for loop doesn't end early
@@ -71,6 +71,7 @@ func ScrapeLinksToFile(bot *discordgo.Session, channel string, amt int, lines ch
 			links := GetLinks(msg)
 			for _, link := range links {
 				lines <- link
+				linksSent++
 			}
 			// set the last id after each message
 			// hacky way of getting the last ID but it works for a script this quick
@@ -84,6 +85,7 @@ func ScrapeLinksToFile(bot *discordgo.Session, channel string, amt int, lines ch
 		// add the number of messages parsed to counter & log it
 		messagesParsed += len(history)
 		log.Println("Messages parsed:",messagesParsed)
+		log.Println("Messages saved:",linksSent)
 		// reload the history buffer starting after the last thing we got before
 		history, err = bot.ChannelMessages(channel, amt, lastMessage, "", "")
 		if err != nil { log.Fatal(err) }
