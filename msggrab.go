@@ -14,18 +14,17 @@ import (
 func main() {
 	// parse args
 	botToken := flag.String("t", "", "Bot token to log in with.")
-	channelsArg := flag.String("c", "", "Comma-separated list of channels to scrape")
 	outFile := flag.String("o", "msggrab.log", "Output file to put the links in")
 	amountPerLoop := flag.Int("a", 20, "Amount of messages to get per second.")
 	flag.Parse()
+	channels := flag.Args()
 	// ensure required args are set
 	if *botToken == "" {
-		log.Fatal("Bot token not specified.")
+		log.Fatal("Bot token not specified (specify with -t).")
 	}
-	if *channelsArg == "" {
+	if len(channels) == 0 {
 		log.Fatal("No channels specified.")
 	}
-	channels := strings.Split(*channelsArg, ",")
 	// open the outfile to write (create if it doesn't exist)
 	outFileStream, err := os.OpenFile(*outFile, os.O_WRONLY | os.O_CREATE, 0644)
 	if err != nil { log.Fatal(err) }
@@ -44,7 +43,6 @@ func main() {
 		for line := range lines {
 			outFileStream.WriteString(line+"\n")
 		}
-		log.Println("done")
 	}
 
 	// log and quit when we're done
@@ -91,6 +89,7 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 		if err != nil { log.Fatal(err) }
 	}
 	lines <- "-----END CHANNEL "+channel+"-----"
+	log.Println("Done scraping channel with ID",channel)
 	close(lines)
 }
 
