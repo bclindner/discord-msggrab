@@ -7,14 +7,15 @@ import (
 	"github.com/bwmarrin/discordgo" // to handle Discord
 	"log"                           // to log bot functions in console
 	"os"                            // to open files, wait for interrupts, etc
-	"regexp"
-	"strings"
-	"time" // to wait politely between history requests
+	"regexp"                        // to extract links from text
+	"strings"                       // for quick string.Contains checking
+	"time"                          // to wait politely between history requests
 )
 
 var regex regexp.Regexp
 
 func main() {
+	// initialize our regex for parsing HTTP(S) URLS from messages
 	regex = *regexp.MustCompile(`https?://[\S]+`)
 	// parse args
 	botToken := flag.String("t", "", "Bot token to log in with.")
@@ -27,7 +28,7 @@ func main() {
 		log.Fatal("Bot token not specified (specify with -t).")
 	}
 	if len(channels) == 0 {
-		log.Fatal("No channels specified.")
+		log.Fatal("No channel IDs specified.")
 	}
 	// open the outfile to write (create if it doesn't exist)
 	outFileStream, err := os.OpenFile(*outFile, os.O_WRONLY|os.O_CREATE, 0644)
@@ -61,7 +62,9 @@ func main() {
 }
 
 func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
+	// get the channel (we'll use its name several times)
 	c, _ := bot.Channel(channel)
+	// let absolutely everything know what's being scraped
 	log.Println("Scraping channel", channel, "(#"+c.Name+")")
 	bot.UpdateStatus(1, "#"+c.Name)
 	lines <- "-----------BEGIN CHANNEL " + channel + " (#" + c.Name + ")-----------"
@@ -110,7 +113,7 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 }
 
 func GetLinks(msg *discordgo.Message) (links []string) {
-	// if there is an HTTP(S) link in there, print it
+	// if there appears to be an HTTP(S) link in there, use our regex to print it
 	if len(msg.Content) > 0 && strings.Contains(msg.Content, "http") {
 		for _, link := range regex.FindAllString(msg.Content, -1) {
 			links = append(links, link)
