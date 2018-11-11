@@ -2,3 +2,4 @@ discord-msggrab
 msggrab
 *.json
 *.log
+*.sh
