@@ -34,7 +34,9 @@ func main() {
 	// start the bot session
 	bot, err := discordgo.New("Bot "+*botToken)
 	if err != nil { log.Fatal("Error starting discordgo session:",err) }
-
+	// make the bot appear online
+	bot.Open()
+	defer bot.Close()
 	// run the scraper function for each channel
 	for _, channel := range channels {
 		// use channels to parse stuff because why not?
@@ -52,6 +54,8 @@ func main() {
 
 func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
 	log.Println("Scraping channel with ID",channel)
+	c, _ := bot.Channel(channel)
+	bot.UpdateStatus(1, "#"+c.Name)
 	lines <- "-----BEGIN CHANNEL "+channel+"-----\n"
 	// initialize a counter for messages parsed (for logging)
 	messagesParsed := 0
