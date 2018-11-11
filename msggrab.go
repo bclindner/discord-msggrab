@@ -3,12 +3,12 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo" // to handle Discord
-	"log" // to log bot functions in console
-	"time" // to wait politely between history requests
-	"os" // to open files, wait for interrupts, etc
-	"strings"
 	"flag"
+	"github.com/bwmarrin/discordgo" // to handle Discord
+	"log"                           // to log bot functions in console
+	"os"                            // to open files, wait for interrupts, etc
+	"strings"
+	"time" // to wait politely between history requests
 )
 
 func main() {
@@ -26,14 +26,18 @@ func main() {
 		log.Fatal("No channels specified.")
 	}
 	// open the outfile to write (create if it doesn't exist)
-	outFileStream, err := os.OpenFile(*outFile, os.O_WRONLY | os.O_CREATE, 0644)
-	if err != nil { log.Fatal(err) }
+	outFileStream, err := os.OpenFile(*outFile, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// make it close when we're done
 	defer outFileStream.Close()
 
 	// start the bot session
-	bot, err := discordgo.New("Bot "+*botToken)
-	if err != nil { log.Fatal("Error starting discordgo session:",err) }
+	bot, err := discordgo.New("Bot " + *botToken)
+	if err != nil {
+		log.Fatal("Error starting discordgo session:", err)
+	}
 	// make the bot appear online
 	bot.Open()
 	defer bot.Close()
@@ -43,7 +47,7 @@ func main() {
 		lines := make(chan string)
 		go ScrapeLinks(bot, channel, *amountPerLoop, lines)
 		for line := range lines {
-			outFileStream.WriteString(line+"\n")
+			outFileStream.WriteString(line + "\n")
 		}
 	}
 
@@ -53,10 +57,10 @@ func main() {
 }
 
 func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
-	log.Println("Scraping channel with ID",channel)
+	log.Println("Scraping channel with ID", channel)
 	c, _ := bot.Channel(channel)
 	bot.UpdateStatus(1, "#"+c.Name)
-	lines <- "-----BEGIN CHANNEL "+channel+"-----\n"
+	lines <- "-----BEGIN CHANNEL " + channel + "-----\n"
 	// initialize a counter for messages parsed (for logging)
 	messagesParsed := 0
 	linksSent := 0
@@ -64,7 +68,9 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 	lastMessage := ""
 	// initialize the history buffer to ensure the for loop doesn't end early
 	history, err := bot.ChannelMessages(channel, amt, lastMessage, "", "")
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 	// run this until there are no messages left in the history buffer
 	for len(history) != 0 {
 		// for every message in the current history buffer
@@ -86,18 +92,20 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 
 		// add the number of messages parsed to counter & log it
 		messagesParsed += len(history)
-		log.Println("Messages parsed:",messagesParsed)
-		log.Println("Messages saved:",linksSent)
+		log.Println("Messages parsed:", messagesParsed)
+		log.Println("Messages saved:", linksSent)
 		// reload the history buffer starting after the last thing we got before
 		history, err = bot.ChannelMessages(channel, amt, lastMessage, "", "")
-		if err != nil { log.Fatal(err) }
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	lines <- "-----END CHANNEL "+channel+"-----"
-	log.Println("Done scraping channel with ID",channel)
+	lines <- "-----END CHANNEL " + channel + "-----"
+	log.Println("Done scraping channel with ID", channel)
 	close(lines)
 }
 
-func GetLinks(msg *discordgo.Message) (links []string){
+func GetLinks(msg *discordgo.Message) (links []string) {
 	// if there is an HTTP(S) link in there, print it
 	if len(msg.Content) > 0 && strings.Contains(msg.Content, "http") {
 		links = append(links, msg.Content)
