@@ -61,10 +61,10 @@ func main() {
 }
 
 func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
-	log.Println("Scraping channel with ID", channel)
 	c, _ := bot.Channel(channel)
+	log.Println("Scraping channel", channel, "(#" + c.Name + ")")
 	bot.UpdateStatus(1, "#"+c.Name)
-	lines <- "-----BEGIN CHANNEL " + channel + "-----\n"
+	lines <- "-----------BEGIN CHANNEL " + channel + " (#"+ c.Name + ")-----------"
 	// initialize a counter for messages parsed (for logging)
 	messagesParsed := 0
 	linksSent := 0
@@ -104,8 +104,8 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 			log.Fatal(err)
 		}
 	}
-	lines <- "-----END CHANNEL " + channel + "-----"
-	log.Println("Done scraping channel with ID", channel)
+	lines <- "-----------END CHANNEL " + channel + " (#"+ c.Name + ")-----------"
+	log.Println("Scraping channel", channel, "(#"+c.Name+")")
 	close(lines)
 }
 
