@@ -7,7 +7,7 @@ It grabs links from a given Discord channel ID and prints them to a file (defaul
 
 Usage should go something like:
 ```
-msggrab -c <CHANNEL_ID>,<CHANNEL_ID>... -t <YOUR_BOT_TOKEN>
+msggrab -t <YOUR_BOT_TOKEN> <CHANNELID_TO_SCRAPE> <CHANNELID_TO_SCRAPE>...
 ```
 
 Full options can be checked with `msggrab -h`.
