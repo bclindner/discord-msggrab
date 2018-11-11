@@ -9,9 +9,13 @@ import (
 	"os"                            // to open files, wait for interrupts, etc
 	"strings"
 	"time" // to wait politely between history requests
+	"regexp"
 )
 
+var regex regexp.Regexp
+
 func main() {
+	regex = *regexp.MustCompile(`https?://[\S]+`)
 	// parse args
 	botToken := flag.String("t", "", "Bot token to log in with.")
 	outFile := flag.String("o", "msggrab.log", "Output file to put the links in")
@@ -108,7 +112,9 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 func GetLinks(msg *discordgo.Message) (links []string) {
 	// if there is an HTTP(S) link in there, print it
 	if len(msg.Content) > 0 && strings.Contains(msg.Content, "http") {
-		links = append(links, msg.Content)
+		for _, link := range regex.FindAllString(msg.Content, -1) {
+			links = append(links, link)
+		}
 	}
 	// also get attachment URLs if available (this will get uploaded stuff)
 	if len(msg.Attachments) > 0 {
