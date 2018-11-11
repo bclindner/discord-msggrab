@@ -7,9 +7,9 @@ import (
 	"github.com/bwmarrin/discordgo" // to handle Discord
 	"log"                           // to log bot functions in console
 	"os"                            // to open files, wait for interrupts, etc
+	"regexp"
 	"strings"
 	"time" // to wait politely between history requests
-	"regexp"
 )
 
 var regex regexp.Regexp
@@ -62,9 +62,9 @@ func main() {
 
 func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- string) {
 	c, _ := bot.Channel(channel)
-	log.Println("Scraping channel", channel, "(#" + c.Name + ")")
+	log.Println("Scraping channel", channel, "(#"+c.Name+")")
 	bot.UpdateStatus(1, "#"+c.Name)
-	lines <- "-----------BEGIN CHANNEL " + channel + " (#"+ c.Name + ")-----------"
+	lines <- "-----------BEGIN CHANNEL " + channel + " (#" + c.Name + ")-----------"
 	// initialize a counter for messages parsed (for logging)
 	messagesParsed := 0
 	linksSent := 0
@@ -104,7 +104,7 @@ func ScrapeLinks(bot *discordgo.Session, channel string, amt int, lines chan<- s
 			log.Fatal(err)
 		}
 	}
-	lines <- "-----------END CHANNEL " + channel + " (#"+ c.Name + ")-----------"
+	lines <- "-----------END CHANNEL " + channel + " (#" + c.Name + ")-----------"
 	log.Println("Scraping channel", channel, "(#"+c.Name+")")
 	close(lines)
 }
